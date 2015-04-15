@@ -1,0 +1,19 @@
+- presentation: keep it simple
+- set context: purpose of the system
+
+- files, replication factor, properties
+- concept: master node, data nodes, 
+- horizontally scale 
+* logical view
+
+* physical view
+- how does it look on a server cluster?
+
+- show read, write paths on the db
+
+- show architecture
+- show an understandable example
+
+- consistency
+- scalability
+
