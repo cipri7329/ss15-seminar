@@ -1,0 +1,35 @@
+Presentation:
+1. Motivation
+2. Hadoop - architecture
+3. Hadoop - workflow
+4. Hadoop - purpose
+5. GFS - architecture
+6. GFS - workflow
+7. GFS - purpose
+8. comparison - similarities
+			  - differences
+9. Examples
+
+
+
+
+
+Slides:
+
+1 - What is gfs
+distributed filesystem from google
+
+
+2 - where is it used
+component failures are the norm
+files are huge
+files are appended, not overwritten
+files are mostly sequentially read
+
+3 - how does it work - overview
+one master - many chunkservers
+files are split into chunks
+chunks are distributed over chunkservers
+replicates?
+
+4 - advantages/disadvantages?
