@@ -9,6 +9,7 @@ Presentation:
 8. comparison - similarities
 			  - differences
 9. Examples
+10. conclusion (future work, alternatives)
 
 
 
