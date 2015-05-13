@@ -112,9 +112,27 @@ Distributed file systems have been a technology enabler to store and process lar
 %===========================================
 % INTRODUCTION
 \section{Introduction}
-Usage control is a generalization of access control that specifies and enforces what 
-mnstalled, and so on.
-The client machines accessing the social network at various users' end might also change in their technical configurations. 
+During the late 90s the Y2K issue was a popular topic in media, but together with the 2000s a bigger and more silent issue took its place. 
+The rise of internet traffic, saving and processing every online footprint, having countless of sensors pouring out data into databases and then the rise of the smartphone to a omnipresence status meant that thousands of terabytes and petabytes of data were being generated daily. 
+This became a problem due to multiple reasons. Firstly, there was no big enough storage medium to store all the data in a single physical location, and secondly processing such amount of data in order to extract valuable information became an even bigger challenge. Even if there were enough space to store huge amounts of data on a single drive, only seeking through such amount of data would be prohibitive in terms of access times. In this context a new IT domain was born - Big Data. 
+
+
+The requirements 
+
+Store very large data sets reliably
+High bandwidth streaming
+Distribute storage
+Distribute computation
+Analysis and transformation of data
+
+The solution
+Moving computation where data resides
+Low costs - commodity machines
+Vertical and Horizontal scalability
+
+Google File System
+
+Hadoop Distributed File System
 
 \begin{figure}
 \centering
@@ -128,14 +146,66 @@ The client machines accessing the social network at various users' end might als
 % Hadoop
 \section{Hadoop Distributed File System (HDFS)}
 .. add text cite~\cite{hadoop1}
+
+Hadoop Ecosystem
+
 \subsection{Architecture}
 .. add text
+\subsubsection{Blocks}
+.. add text
+\subsubsection{Data Nodes}
+.. add text
+\subsubsection{Name Node}
+master-worker pattern
+namespace
+Inode
+Metadata
+Where is the namespace located
+
+\subsubsection{Client}
+.. add text
+\subsubsection{Secondary Node}
+- insert picture
+Is there any weakness in the architecture
+.. add text
+Checkpoint node
+Backup node
+
 \subsection{Workflow}
 .. add text
+\subsubsection{Startup}
+\subsubsection{Write}
+.. add text code sample
+\subsubsection{Read}
+.. add text code sample
+
 \subsection{Features}
 .. add text
+\subsubsection{Block placement policy}
+\subsubsection{Replica management}
+\subsubsection{Balancer}
+\subsubsection{Block scanner}
+
 \subsection{Purpose}
 .. add text
+Optimized for
+- large files
+- commodity hardware
+- streaming
+- batch processing
+- multiple reads
+Not optimized for
+- big amount of small files
+- concurrent modification
+- arbitrary modification
+- general purpose applications
+Cross platform
+- java, thrift, rest
+- web access, console
+- opensource
+Companies using hdfs
+- linkedin, amazon, new york times, twitter, ebay, facebook, spotify, ibm, yahoo
+
 
 %===========================================
 % GFS
