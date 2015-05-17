@@ -19,8 +19,13 @@
 \BOOKMARK [1][-]{section.3}{Google File System \(GFS\)}{}% 19
 \BOOKMARK [2][-]{subsection.3.1}{Purpose}{section.3}% 20
 \BOOKMARK [2][-]{subsection.3.2}{Architecture}{section.3}% 21
-\BOOKMARK [2][-]{subsection.3.3}{Workflow}{section.3}% 22
-\BOOKMARK [2][-]{subsection.3.4}{Features}{section.3}% 23
-\BOOKMARK [1][-]{section.4}{Comparison}{}% 24
-\BOOKMARK [1][-]{section.5}{Conclusions and Future Work}{}% 25
-\BOOKMARK [1][-]{section.6}{References}{}% 26
+\BOOKMARK [2][-]{subsection.3.3}{Workflows}{section.3}% 22
+\BOOKMARK [3][-]{subsubsection.3.3.1}{Read}{subsection.3.3}% 23
+\BOOKMARK [3][-]{subsubsection.3.3.2}{Write}{subsection.3.3}% 24
+\BOOKMARK [3][-]{subsubsection.3.3.3}{Record Append}{subsection.3.3}% 25
+\BOOKMARK [2][-]{subsection.3.4}{Features}{section.3}% 26
+\BOOKMARK [3][-]{subsubsection.3.4.1}{Chunk Replication}{subsection.3.4}% 27
+\BOOKMARK [3][-]{subsubsection.3.4.2}{Garbage Collection}{subsection.3.4}% 28
+\BOOKMARK [1][-]{section.4}{Comparison}{}% 29
+\BOOKMARK [1][-]{section.5}{Conclusions and Future Work}{}% 30
+\BOOKMARK [1][-]{section.6}{References}{}% 31

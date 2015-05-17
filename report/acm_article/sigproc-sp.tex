@@ -210,15 +210,150 @@ Companies using hdfs
 %===========================================
 % GFS
 \section{Google File System (GFS)}
-.. add text
+The Google File System was implemented by Google to meet Google's needs. It is widely used within their company.
 \subsection{Purpose}
-.. add text
+Since the concept of the GFS is the basis of HDFS the purpose of GFS is not much different to the purpose of HDFS. It was designed to store large files, meaning 100 MB and more per file. It should run on commodity hardware, therefore the system has to be fault tolerant. Optimized operations are appending to files and sequential reading of files, which are typical operations when streaming files. The goal of GFS is high data throughput.
+While HDFS is open source and widely used by different companies, GFS is not and is only used by Google itself.
+
 \subsection{Architecture}
-.. add text
-\subsection{Workflow}
-.. add text
+The GFS consists of three different types of components: the chunkservers, the master and the clients (see figure \ref{fig:gfs_architecture}). While chunkservers store the data which is available in the system, the master controlls the data. The clients can access available data through the master.
+
+\begin{figure}[!hbt]
+\centering
+\epsfig{file=gfs_pics/architecture.png, width=\linewidth}
+\caption{Google File System Architecture}
+\label{fig:gfs_architecture}
+\end{figure}
+
+The GFS divides files into chunks of a fixed size. The default chunk size is 64 MB.
+Chunks are replicated to increase fault tolerance and load balancing (see \ref{fault_tolerance_load_balancing}). To identify chunks GFS uses a 64 bit long chunk id which is globally unique.~\cite{google1}
+
+A GFS instance usually consists of many chunkservers which store chunks and one master (see figure \ref{fig:gfs_architecture}). A chunkserver knows about its stored chunks and the corresponding chunk ids. In contrast the master knows about all existing files and which chunks are part of a specific file. Furthermore the master knows where the chunks are stored. It also handles access to chunks as explained in \ref{gfs_workflows}. While the master coordinates access to files, the transmission of data is done directly between a chunkserver and a client. The master is never directly involved in a transmission of data.
+
+\subsection{Workflows}
+\label{gfs_workflows}
+The GFS allows different operations. The most important ones are \textit{Read}, \textit{Write} and \textit{Record Append}.
+
+\subsubsection{Read}
+Reading is the simplest of the mentioned operations and will be explained with figure \ref{fig:gfs_read}.
+
+\begin{figure}[!hbt]
+\centering
+\epsfig{file=gfs_pics/read.png, width=\linewidth}
+\caption{GFS read workflow}
+\label{fig:gfs_read}
+\end{figure}
+
+To read a file, the client first needs to calculate which part respectively chunk it wants to read. This can be done by the client, because the fixed size of the chunks is known system wide. The client calculates for a specific file the chunk index which corresponds to the byte offset it wants to read (not shown in the figure).
+Then the client sends a request to the master, containing the name and previously calculated chunk index of the requested file (step 1 in the figure). The master responds with the unique chunk id (see \ref{fig:gfs_architecture}) of the requested chunk and its positions within the system, i.e. the chunkservers containing the requested chunks (step 2). In the 3rd step the client chooses one of the chunkservers and sends a request containing the chunk id and the byte range within that chunk. Finally the chunkserver sends the requested data to the client.
+
+\subsubsection{Write}
+\label{gfs_write}
+Writing to a file is a bit more complex than the \textit{Read} operation. The \textit{Write} operation can be defined as modifying a specific byte range within a file.
+
+\label{leases}
+\textbf{Leases}
+
+GFS uses the mechanism of leases for writing to files. This is done to ensure a consitent mutation order for all replicas of a chunk. A chunkserver may have leases for chunks, but only one chunkserver may have the lease for a specific chunk at any time. The chunkserver which has the lease for a chunk is called \textit{primary}, the others are called \textit{secondaries}. Leases can be requested by chunkservers and are granted by the master.
+
+The following steps explain the execution of a \textit{Write} operation.
+
+\begin{figure}[!hbt]
+\centering
+\epsfig{file=gfs_pics/write.png, width=\linewidth}
+\caption{GFS write workflow}
+\label{fig:gfs_write}
+\end{figure}
+
+Assume the following scenario with reference to figure \ref{fig:gfs_write}:
+
+There are three chunkservers (CS), all of them containing the chunk x where x is the unique identifier of the chunk. CS2 is the primary. The master knows that there is a specific file (called file1) which is divided into different chunks with the first chunk being chunk x. It also knows that chunk x is available on the mentioned CSs CS1, CS2 and CS3. The client wants to write to the first byte of file1.
+
+\begin{enumerate}
+\item 
+Like in the read operation the client's first step is to calculate the chunk index it wants to write to. With the intention to write the first byte of file x the client calculates the chunk index which is 0 (the first chunk of the file). Now the client sends a request to the master containing file name and chunk index (file1, 0).
+
+\item
+The master replies with the chunk id, the primary and the secondaries (x, \textbf{CS2}, CS1, CS3). If at this point no CS has the lease for requested chunk, the master grants the lease to one of the chunks before answering the clients request.
+
+\item
+With that information the client pushes the data which it wants to write to all replicas (the primary and the secondaries). All receiving CSs write the data to its buffer cache and respond with an acknowledgement for receiving the data.
+
+\item
+After all CSs have acknowledged receiving the data, the client sends a write request to the primary. At this point the primary applies the requested write to itself.
+
+\item
+Then the primary forwards the write request to all secondaries leading them to apply the changes in the same order.
+
+\item
+On successfull writing the data the secondaries will indicate the completion of the write with a response to the primary.
+
+\item
+At last the primary returns the result of the write to the client. If there was any error, the client will retry the write from step 3 (pushing the data to CSs). If the error persists, the client will restart from step 1.
+
+\end{enumerate}
+
+\subsubsection{Record Append}
+With \textit{Record Append} the GFS provides an atomic write operation. When a client uses this operation to change a file, the client transmits only the data it wants to write, not the position. The CS then decides where the data is written and returns the offset to the client.
+
+The workflow for record append is similar to the write operation explained in \ref{gfs_write}. The differences are in the following steps:
+
+\begin{enumerate}
+\item[3.]
+The client generally pushes the data to the last chunk of the file.
+
+\item[4.]
+Instead of requesting a write, the client sends a record appen request.
+
+\item[5.]
+Before the primary applies the changes it checks if the data fits in the chunk (see below). If it fits the following steps are the same as for the write operation.
+\end{enumerate}
+
+Something different happens, if the primary's check fails:
+
+If a client wants to append data to a file and the last chunk does not provide enough free space the primary does not apply the changes.
+
+\includegraphics[width=\linewidth]{gfs_pics/writeappend_1.png}
+
+Instead the chunk is padded (e.g. filled up with zeros) and a new chunk is created for the file. The primary then responds to the client with an error asking it to retry the request with the new created chunk.
+
+\includegraphics[width=\linewidth]{gfs_pics/writeappend_2.png}
+
+The client will retry, now pushing the data to the new chunk and will succeed.
+
+\includegraphics[width=\linewidth]{gfs_pics/writeappend_3.png}
+
+Since the chunk size is limited the record append is technically limited to data with a size of 64 MB or less. GFS further restricts the record append operation to data with no more than one forth of the chunk size. This decision was made to reduce the fragmentation which is created by unsuccessful record append operations.
+
 \subsection{Features}
-.. add text
+GFS has a few features implemented to enhance performance and fault tolerance. Chunk replication and garbage collection are two of them which will be explained in the following sections.
+
+\subsubsection{Chunk Replication}
+\label{gfs_fault_tolerance_load_balancing}
+As mentioned earlier, chunks in the GFS are replicated. By default there are three replicas of each chunk.
+
+\textbf{Chunk Creation:}
+When a new chunk is created the master decides where the replicas are placed. This decision is affected by three factors. First new replicas are preferably placed on chunkservers with the most free space. This is done to fill up newly added chunkservers and to have a balanced usage of disk space. Secondly the number creations per chunkserver at any time should not be too high. This avoids flooding new chunkservers with requests. And third the replicas for each chunk should not be on the same rack of chunkservers. This enhances the fault tolerance of the system when whole racks go down e.g. due to network problems.
+
+\textbf{Chunk Re-replication:}
+As soon as the number of replicas for a chunk is lower than specified the master will re-replicate it. When re-replicating a chunk the same factors are considered as during the chunk creation. Additionally the re-replication of chunks is prioritized: chunks which have lost more replicas are prioritized to others. Deleted files (see \ref{gfs_gc}) get a lower priority. And at last files currently in use get a higher priority. 
+
+\textbf{Chunk Rebalancing:}
+The master periodically checks the distribution of replicas. Depending on chunkserver load and disk space usage the master moves replicas between chunkservers to improve the load and disk space usage.
+
+\subsubsection{Garbage Collection}
+\label{gfs_gc}
+When a file is deleted in the GFS the master logs the deletion and renames the file, creating a "hidden" file. The deletion time stamp is included in the file name. The garbage collection runs periodically and searches fo files which have been deleted at least three days (default value) ago. Finding such a file results in the final deletion of the file. (figure \ref{fig:gfs_gc})
+
+Until the deletion by the garbage collection the file can still be accessed (using the new file name) or undeleted.
+
+\begin{figure}[!hbt]
+\centering
+\epsfig{file=gfs_pics/garbagecollection.png, width=\linewidth}
+\caption{GFS garbage collection}
+\label{fig:gfs_gc}
+\end{figure}
+
 %===========================================
 \section{Comparison}
 .. add text
