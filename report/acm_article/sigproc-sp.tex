@@ -210,7 +210,7 @@ Companies using hdfs
 %===========================================
 % GFS
 \section{Google File System (GFS)}
-The Google File System was implemented by Google to meet Google's needs. It is widely used within their company.
+The Google File System, a distributed file system, was implemented by Google to meet Google's needs. It is widely used within their company.
 \subsection{Purpose}
 Since the concept of the GFS is the basis of HDFS the purpose of GFS is not much different to the purpose of HDFS. It was designed to store large files, meaning 100 MB and more per file. It should run on commodity hardware, therefore the system has to be fault tolerant. Optimized operations are appending to files and sequential reading of files, which are typical operations when streaming files. The goal of GFS is high data throughput.
 While HDFS is open source and widely used by different companies, GFS is not and is only used by Google itself.
@@ -226,7 +226,7 @@ The GFS consists of three different types of components: the chunkservers, the m
 \end{figure}
 
 The GFS divides files into chunks of a fixed size. The default chunk size is 64 MB.
-Chunks are replicated to increase fault tolerance and load balancing (see \ref{fault_tolerance_load_balancing}). To identify chunks GFS uses a 64 bit long chunk id which is globally unique.~\cite{google1}
+Chunks are replicated to increase fault tolerance and load balancing (see \ref{gfs_fault_tolerance_load_balancing}). To identify chunks GFS uses a 64 bit long chunk id which is globally unique.~\cite{google1}
 
 A GFS instance usually consists of many chunkservers which store chunks and one master (see figure \ref{fig:gfs_architecture}). A chunkserver knows about its stored chunks and the corresponding chunk ids. In contrast the master knows about all existing files and which chunks are part of a specific file. Furthermore the master knows where the chunks are stored. It also handles access to chunks as explained in \ref{gfs_workflows}. While the master coordinates access to files, the transmission of data is done directly between a chunkserver and a client. The master is never directly involved in a transmission of data.
 
@@ -356,7 +356,19 @@ Until the deletion by the garbage collection the file can still be accessed (usi
 
 %===========================================
 \section{Comparison}
-.. add text
+Comparing the two distributed file systems, only a closer look uncovers a few differences between HDFS and GFS. But before pointing out these differences a short summary of similarities will be given.\cite{comparison1}
+
+\textbf{Similarities}
+
+Both systems are optimized for operations of the same kind. Processing large files with high performance is one important key feature in the systems. Optimization was done with the assumption that files are written once and read many times. Appending to files has a high performance and guarantees consistency. In contrast modifying files is supported but not seen as important operation and therefore not optimized.
+Having these things in mind one can see that GFS and HDFS allow performant streaming of files.
+
+\textbf{Differences}
+There are only a few minor differences. GFS allows concurrent appending of files since appending is an atomic operation. This is not the case in HDFS.
+The HDFS's namenode is a single point of failure and provides no automatic recovery. In GFS there is the master, which is in some way also a single point of failure. But on a failure the master tries to recover. If this is not working there are also so called shadow masters which can take over operation.
+HDFS provides the feature of permission allowing to restrict access to files for different users. The GFS seems not to implement these at the current state.
+
+It can be seen that there are not many differences. The main difference between both systems is the availability: GFS is a proprietary system in contrast to HDFS which is open source.
 
 %===========================================
 % CONCLUSIONS
