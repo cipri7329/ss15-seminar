@@ -100,7 +100,7 @@ Daniel Straub\\
 
 \maketitle
 \begin{abstract}
-Distributed file systems have been a technology enabler to store and process large files which exceed the size of any drive. They also work in a distributed and fail tolerant manner. The first and most known implementations are Google File System and Hadoop Distributed File System.
+Distributed file systems have been a technology enabler to store and process large files which exceed the size of any drive while working in a distributed and fail tolerant manner. The first and most known implementations are Google File System and Hadoop Distributed File System.
 \end{abstract}
 
 % A category with the (minimum) three required fields
@@ -113,48 +113,54 @@ Distributed file systems have been a technology enabler to store and process lar
 % INTRODUCTION
 \section{Introduction}
 During the late 90s the Y2K issue was a popular topic in media, but together with the 2000s a bigger and more silent issue took its place. 
-The rise of internet traffic, saving and processing every online footprint, having countless of sensors pouring out data into databases and then the rise of the smartphone to a omnipresence status meant that thousands of terabytes and petabytes of data were being generated daily. 
-This became a problem due to multiple reasons. Firstly, there was no big enough storage medium to store all the data in a single physical location, and secondly processing such amount of data in order to extract valuable information became an even bigger challenge. Even if there were enough space to store huge amounts of data on a single drive, only seeking through such amount of data would be prohibitive in terms of access times. In this context a new IT domain was born - Big Data. 
+The rise of internet traffic, saving and processing every online footprint (e.g. user clicks), having countless sensors pouring out data into databases and then the dawn of the smartphone era meant that thousands of terabytes and petabytes of data were being generated daily. 
+This became a problem due to multiple reasons. Firstly, there was no large enough storage medium to store all the data in a single physical location, and secondly processing such amount of data in order to extract valuable information became an even bigger challenge. Even if there were enough space to store huge amounts of data on a single drive, only seeking through such amount of data would be prohibitive in terms of access times. In this context a new IT domain was born - Big Data. 
 
+The requirements of an innovative file system which could cope with such large amounts of data can be traced along the following lines.
+Firstly, large amounts of data should be stored reliably. 
+Secondly, high bandwidth streaming is a priority (e.g. play a youtube video before it is all loaded locally).
+Another key aspect is distributing storage across multiple locations
+and distributed computation.
+Finally, data besides being stored must be analyzed and transformed in a cost-effective manner.
 
-The requirements 
-
-Store very large data sets reliably
-High bandwidth streaming
-Distribute storage
-Distribute computation
-Analysis and transformation of data
-
-The solution
-Moving computation where data resides
-Low costs - commodity machines
-Vertical and Horizontal scalability
-
-Google File System
-
-Hadoop Distributed File System
-
-\begin{figure}
-\centering
-\epsfig{file=domain-meta-model.eps, height=2in, width=3in}
-\caption{Domain meta-model}
-\label{fig:metamodel}
-\end{figure}
+The proposed solution came from Google where Google File System~\cite{google1} was introduced alongside the MapReduce algorithm.
+The central pillars of the proposed solution are the following.
+First of all, moving computation where data resides means sending the algorithm in a distributed manner where the data is stored, compute partial results and then combine them. The old paradigm was to bring all the data to a central location, e.g. a supercomputer, and there do all the processing. Moving a few lines of code of an algorithm across network and retrieving partial results is much faster than moving the entire data across networks.
+Secondly, low costs is achieved by using commodity machines. This means that instead of using very expensive and customized hardware, the new system could run on any computer available at any IT store. Thus the new system must have a high fault tolerance because in a cluster of thousands of servers, the failure rate of an average computer can become quite high compared to the old paradigm.
+Finally, vertical and horizontal scalability provide maintainability and extensibility to the system. Vertical scalability means that a node in the server cluster can be upgraded at any time in terms of hardware components, e.g. RAM, CPU, storage. Horizontal scalability means that a new node can always be automatically added to the system without the need of restarting or changing the running server cluster.
 
 
 %===========================================
 % Hadoop
 \section{Hadoop Distributed File System (HDFS)}
-.. add text cite~\cite{hadoop1}
+Hadoop Distributed File System was first introduced in ~\cite{hadoop1}.
+It was inspired by the Google File System and it published by Apache Foundation as an open-source system.
 
-Hadoop Ecosystem
+Hadoop Distributed File System is part of a larger ecosystem.
+Together with the MapReduce paradigm it constitutes the Hadoop framework to store and process big data sets. On top of these other frameworks such as PIG, Hive, or Hbase can be added as additional layers for data display, processing, tracing and other features. 
 
 \subsection{Architecture}
-.. add text
+Hadoop distributed file system runs on a server cluster at in the user space level of the host operating system. A server cluster can span from only a few nodes to thousands of nodes and a server cluster can be also distributed geographically. As a good practice, it is recommended~\cite{hadoop1} to have multiple independent Hadoop clusters than only one huge cluster. This section contains a bottom up introduction to HDFS architecture. 
+
 \subsubsection{Blocks}
-.. add text
+HDF has many similarities with the file system of the common operating systems. Such a similarity is the use of the concepts of \textbf{\texttt{blocks}}.
+A large file is split into blocks and a HDFS block by default contains at most 64 MB and can be configured also to 128 MB, 256 MB and so on.
+In this context, large files usually mean a couple hundreds of GB, files and data which is larger than any single drive.
+Data accepted by HDFS to be stored can be in any format.
+
+Alongside the data, the other important part is the \texttt{Metadata} which includes a checksum to ensure data integrity and a block generation timestamp.
+
 \subsubsection{Data Nodes}
 .. add text
+
+Replication factor
+
+Heartbeat
+Report blocks
+
+Organized into racks
+Thousands of data nodes in a cluster
+
 \subsubsection{Name Node}
 master-worker pattern
 namespace
