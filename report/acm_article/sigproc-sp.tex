@@ -151,46 +151,92 @@ Data accepted by HDFS to be stored can be in any format.
 Alongside the data, the other important part is the \texttt{Metadata} which includes a checksum to ensure data integrity and a block generation timestamp.
 
 \subsubsection{Data Nodes}
-.. add text
+The next important component of the HDFS is the location of the blocks. These are stored on a \textbf{\texttt{Data Node}}. Each Data Node usually has around 70\% of the available storage capacity allocated for storing blocks. There is no "perfect" Hadoop configuration for any use case, therefore any configuration number should be taken only as a concrete example for understanding purposes.
 
-Replication factor
+HDFS runs on commodity and the failure rate of such a server is quite high, so is down the entire content of that server is then down. 
+Therefore, in order to provide high fault-tolerance, each block is replicated n-times, i.e. \texttt{replication factor}, on other data nodes.
 
-Heartbeat
-Report blocks
+Each Data-node issues a \texttt{block report} periodically (by default one/hour) which represents all blocks available on that server.
+Additionally, it issues a \texttt{heartbeat} periodically (by default every 3 seconds) providing information about current transfers, storage usage and other useful information for balancing the load of the cluster.
 
-Organized into racks
-Thousands of data nodes in a cluster
+Data nodes are organized into racks and a cluster can contain thousands of data nodes. Data nodes are identified by a unique id which is independent of IP address and port. Also, the location of a data node is rack and network switch aware.
 
 \subsubsection{Name Node}
-master-worker pattern
-namespace
-Inode
-Metadata
-Where is the namespace located
+On of the most important components is the \textbf{\texttt{Name node}}.
+It interacts with the Data-nodes by the \texttt{master-worker pattern}.
+This means that actions performed by the data-nodes are dispatched by the name-node. Data-nodes are concerned only with storing and retrieving data, while the Name-node is concerned with the organization and location of the data on the data-nodes.
+
+The files can be organized in directories thus forming a tree. A stored element name is composed by the location of block and the block id.
+The \texttt{namespace} represents the file in the HDFS and and the blocks associated to each file. For example \textit{file1} is located in \textit{/user/dir1/} and is composed of blocks \textit{node1bk1, node1bk2, node3bk5, node4bk2}.
+In order to improve the look-up speed of a file and associated blocks, the entire namespace is located in RAM of the NameNode. Therefore it is recommended that the Name node is a machine with increased memory and computing power compared to the average data node.
+The entries and the namespace are represented by an \texttt{inode} which also contains information about permissions, modification and access times.
+
+The most important elements contained in the \texttt{metadata} are the edit log, system image and block location.
+A log of all the changes made to the namespace is called the \texttt{edit log}. The \texttt{system image} is represented by the edit log and the namespace. \texttt{Block location} contains the mapping the mapping of any block id to all the replicas stored on data nodes.
 
 \subsubsection{Client}
-.. add text
+The final core component of a useful distributed file system is the \textbf{\texttt{client}}.
+The HDFS client is a code library written in Java which 
+exposes HDFS interface to
+read, write, create, delete files or folders. 
+
+
 \subsubsection{Secondary Node}
-- insert picture
+\begin{figure}[!hbt]
+\centering
+\epsfig{file=hdfs_pics/hdfs1.png, width=\linewidth}
+\caption{HDFS Architecture}
+\label{fig:hdfs_architecture}
+\end{figure}
+
 Is there any weakness in the architecture
 .. add text
 Checkpoint node
 Backup node
 
 \subsection{Workflow}
-.. add text
+Single writer, multiple reader model
+
 \subsubsection{Startup}
+1. Handshake
+- name space id
+- software version
+2. Register
+- storage id
+3. Block report
+4. Heartbeat
+
 \subsubsection{Write}
-.. add text code sample
+1. Request block in namespace for file
+2. Send block to a Data node
+3. Create first replica
+4. Create second replica
+
 \subsubsection{Read}
-.. add text code sample
+5. Get list of datanodes hosting file blocks
+6. Get blocks in order
 
 \subsection{Features}
 .. add text
+
+
 \subsubsection{Block placement policy}
+1. No Data node contains more than one replica of any block
+2. No rack contains more than two replicas of the same block (if sufficient racks on the cluster)
+
 \subsubsection{Replica management}
+@Name node
+- optimize disk usage
+- replication factor
+- rack awareness
+
 \subsubsection{Balancer}
+@Name node
+- disk space usage
+- move replicas
+
 \subsubsection{Block scanner}
+@Datanode
 
 \subsection{Purpose}
 .. add text
