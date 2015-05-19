@@ -180,8 +180,16 @@ The HDFS client is a code library written in Java which
 exposes HDFS interface to
 read, write, create, delete files or folders. 
 
-
 \subsubsection{Secondary Node}
+The design weakness of the architecture presented so far is that the name node acts as a bottleneck. 
+If the name node is down, then the entire system is down.
+In order to speed-up the restart of the system, another node was added to support the name node - the \textbf{\texttt{secondary node}}. The secondary node does not increase the availability of the name node, but has the following roles.
+
+The secondary node is called a \texttt{checkpoint node} if it only stores the system image from the name node. At a predefined interval it will request the latest system image and edit log and store it locally. In the case of a name node failure, the name node can be restarted and it's state restored by using the information from the checkpoint. 
+
+If on the secondary node there is also an up to date namespace kept in memory then this node is called a \texttt{backup node}. This is also called a read-only name node. 
+
+
 \begin{figure}[!hbt]
 \centering
 \epsfig{file=hdfs_pics/hdfs1.png, width=\linewidth}
@@ -189,22 +197,15 @@ read, write, create, delete files or folders.
 \label{fig:hdfs_architecture}
 \end{figure}
 
-Is there any weakness in the architecture
-.. add text
-Checkpoint node
-Backup node
 
 \subsection{Workflow}
-Single writer, multiple reader model
+HDFS follows the single writer, multiple reader model.
 
 \subsubsection{Startup}
-1. Handshake
-- name space id
-- software version
-2. Register
-- storage id
-3. Block report
-4. Heartbeat
+When a data node is added to the server cluster it performs the following series of steps.
+\texttt{Step 1.} is a \texttt{handshake} when the name space id and the software version of the data node are compared to the already existing nodes. If it is a newly initialed node, it can be added to the cluster by performing \texttt{Step 2. Register}. Here the data node will receive a unique storage id which will not change later, being independent of the node's location.
+At \texttt{Step 3.} the first \texttt{block report} is sent to the name node. And finally, at \texttt{Step 4.} the data node begins sending \texttt{heartbeats}. The name node never communicates directly to any data node but replies with commands to the hearbeats. Therefore, if a data node does not send a heartbeat during a predefined time interval, 10 min default, then that data node is considered down and the blocks stored on that data node will be replicated on other data nodes.
+
 
 \subsubsection{Write}
 1. Request block in namespace for file
