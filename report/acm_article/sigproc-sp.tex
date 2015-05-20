@@ -165,7 +165,7 @@ Additionally, it issues a \texttt{heartbeat} periodically (by default every 3 se
 Data nodes are organized into racks and a cluster can contain thousands of data nodes. Data nodes are identified by a unique storage id which is independent of IP address and port. Also, the location of a data node is rack and network switch aware.
 
 \subsubsection{Name Node}
-On of the most important components is the \textbf{\texttt{Name node}}.
+One of the most important components is the \textbf{\texttt{Name node}}.
 It interacts with the Data-nodes by the \texttt{master-worker pattern}.
 This means that actions performed by the data-nodes are dispatched by the name-node. Data-nodes are concerned only with storing and retrieving data, while the Name-node is concerned with the organization and location of the data on the data-nodes.
 
