@@ -137,60 +137,60 @@ Finally, vertical and horizontal scalability provide maintainability and extensi
 % Hadoop
 \section{Hadoop Distributed File System (HDFS)}
 Hadoop Distributed File System was first introduced in ~\cite{hadoop1}.
-It was inspired by the Google File System and it published by Apache Foundation as an open-source system.
+It was inspired by the Google File System and published by Apache Foundation as an open-source system.
 
 Hadoop Distributed File System is part of a larger ecosystem.
 Together with the MapReduce paradigm it constitutes the Hadoop framework to store and process big data sets. On top of these other frameworks such as PIG, Hive, or Hbase can be added as additional layers for data display, processing, tracing and other features. 
 
 \subsection{Architecture}
-Hadoop distributed file system runs on a server cluster at in the user space level of the host operating system. A server cluster can span from only a few nodes to thousands of nodes and a server cluster can be also distributed geographically. As a good practice, it is recommended~\cite{hadoop1} to have multiple independent Hadoop clusters than only one huge cluster. This section contains a bottom up introduction to HDFS architecture. 
+Hadoop distributed file system runs on a server cluster in the user space level of the host operating system. A server cluster can span from only a few nodes to thousands of nodes and a cluster can also be distributed geographically. As a good practice, it is recommended~\cite{hadoop1} to have multiple independent Hadoop clusters rather than only one huge cluster. The following paragraphs contain a bottom up introduction to HDFS architecture. 
 
 \subsubsection{Blocks}
-HDF has many similarities with the file system of the common operating systems. Such a similarity is the use of the concepts of \textbf{\texttt{blocks}}.
-A large file is split into blocks and a HDFS block by default contains at most 64 MB and can be configured also to 128 MB, 256 MB and so on.
-In this context, large files usually mean a couple hundreds of GB, files and data which is larger than any single drive.
+HDF has many similarities with the file system of the common operating systems. Such a similarity is the use of the concept of \textbf{\texttt{blocks}}.
+A large file is split into blocks and a HDFS block by default contains at most 64 MB and can also be configured to 128 MB, 256 MB and so on.
+In this context, large data sets usually mean a couple hundreds of GB, files and data which are larger than any single drive.
 Data accepted by HDFS to be stored can be in any format.
 
 Alongside the data, the other important part is the \texttt{Metadata} which includes a checksum to ensure data integrity and a block generation timestamp.
 
 \subsubsection{Data Nodes}
-The next important component of the HDFS is the location of the blocks. These are stored on a \textbf{\texttt{Data Node}}. Each Data Node usually has around 70\% of the available storage capacity allocated for storing blocks. There is no "perfect" Hadoop configuration for any use case, therefore any configuration number should be taken only as a concrete example for understanding purposes.
+The next important component of the HDFS is the location of the blocks. These are stored on a \textbf{\texttt{Data Node}}, which is a physical machine. Each Data Node usually has around 70\% of the available storage capacity allocated for storing blocks. There is no "perfect" Hadoop configuration for any use case, therefore any configuration number should be taken only as a concrete example for understanding purposes.
 
-HDFS runs on commodity and the failure rate of such a server is quite high, so is down the entire content of that server is then down. 
+HDFS runs on commodity machines and the failure rate of such a server is quite high; if the machine is down then the entire content of that server is not accessible. 
 Therefore, in order to provide high fault-tolerance, each block is replicated n-times, i.e. \texttt{replication factor}, on other data nodes.
 
-Each Data-node issues a \texttt{block report} periodically (by default one/hour) which represents all blocks available on that server.
+Each Data-node issues a \texttt{block report} periodically (by default one per hour) which represents all blocks available on that server.
 Additionally, it issues a \texttt{heartbeat} periodically (by default every 3 seconds) providing information about current transfers, storage usage and other useful information for balancing the load of the cluster.
 
-Data nodes are organized into racks and a cluster can contain thousands of data nodes. Data nodes are identified by a unique id which is independent of IP address and port. Also, the location of a data node is rack and network switch aware.
+Data nodes are organized into racks and a cluster can contain thousands of data nodes. Data nodes are identified by a unique storage id which is independent of IP address and port. Also, the location of a data node is rack and network switch aware.
 
 \subsubsection{Name Node}
 On of the most important components is the \textbf{\texttt{Name node}}.
 It interacts with the Data-nodes by the \texttt{master-worker pattern}.
 This means that actions performed by the data-nodes are dispatched by the name-node. Data-nodes are concerned only with storing and retrieving data, while the Name-node is concerned with the organization and location of the data on the data-nodes.
 
-The files can be organized in directories thus forming a tree. A stored element name is composed by the location of block and the block id.
-The \texttt{namespace} represents the file in the HDFS and and the blocks associated to each file. For example \textit{file1} is located in \textit{/user/dir1/} and is composed of blocks \textit{node1bk1, node1bk2, node3bk5, node4bk2}.
-In order to improve the look-up speed of a file and associated blocks, the entire namespace is located in RAM of the NameNode. Therefore it is recommended that the Name node is a machine with increased memory and computing power compared to the average data node.
+The files can be organized in directories thus forming a tree. A stored element name is composed by the location of the block and the block id.
+The \texttt{namespace} represents the files in the HDFS and the blocks associated to each file. For example \textit{file1} is located in \textit{/user/dir1/} and is composed of blocks \textit{node1bk1, node1bk2, node3bk5, node4bk2}.
+In order to improve the look-up speed of a file and associated blocks, the entire namespace is located in the RAM of the Namenode. Therefore it is recommended that the Name node is a machine with increased memory and computing power compared to the average data node.
 The entries and the namespace are represented by an \texttt{inode} which also contains information about permissions, modification and access times.
 
 The most important elements contained in the \texttt{metadata} are the edit log, system image and block location.
 A log of all the changes made to the namespace is called the \texttt{edit log}. The \texttt{system image} is represented by the edit log and the namespace. \texttt{Block location} contains the mapping the mapping of any block id to all the replicas stored on data nodes.
 
 \subsubsection{Client}
-The final core component of a useful distributed file system is the \textbf{\texttt{client}}.
+The final core component of a distributed file system is the \textbf{\texttt{client}}.
 The HDFS client is a code library written in Java which 
 exposes HDFS interface to
 read, write, create, delete files or folders. 
 
 \subsubsection{Secondary Node}
-The design weakness of the architecture presented so far is that the name node acts as a bottleneck. 
+The design weakness of the architecture presented so far is that the name node acts as a bottleneck, as seen in Figure~\ref{fig:hdfs_architecture}.
 If the name node is down, then the entire system is down.
-In order to speed-up the restart of the system, another node was added to support the name node - the \textbf{\texttt{secondary node}}. The secondary node does not increase the availability of the name node, but has the following roles.
+Therefore, in order to speed-up the restart of the system, another node was added to support the name node - the \textbf{\texttt{secondary node}}. The secondary node does not increase the availability of the name node, but has the following roles.
 
-The secondary node is called a \texttt{checkpoint node} if it only stores the system image from the name node. At a predefined interval it will request the latest system image and edit log and store it locally. In the case of a name node failure, the name node can be restarted and it's state restored by using the information from the checkpoint. 
+The secondary node is called a \texttt{checkpoint node} if it only stores the system image from the name node. At a predefined interval it will request the latest system image and edit log and store it locally. In the case of a name node failure, the name node can be restarted and its state restored by using the information from the checkpoint. 
 
-If on the secondary node there is also an up to date namespace kept in memory then this node is called a \texttt{backup node}. This is also called a read-only name node. 
+If the secondary node also contains an up to date namespace in memory then this node is called a \texttt{backup node}. This is also called a read-only name node. 
 
 \begin{figure}[!hbt]
 \centering
@@ -200,17 +200,17 @@ If on the secondary node there is also an up to date namespace kept in memory th
 \end{figure}
 
 \subsection{Workflow}
-HDFS follows the single writer, multiple reader model.
+HDFS follows the single writer, multiple reader model. 
 
 \subsubsection{Startup}
 When a data node is added to the server cluster it performs the following series of steps.
-\texttt{Step 1.} is a \texttt{handshake} when the name space id and the software version of the data node are compared to the already existing nodes. If it is a newly initialed node, it can be added to the cluster by performing \texttt{Step 2. Register}. Here the data node will receive a unique storage id which will not change later, being independent of the node's location.
-At \texttt{Step 3.} the first \texttt{block report} is sent to the name node. And finally, at \texttt{Step 4.} the data node begins sending \texttt{heartbeats}. The name node never communicates directly to any data node but replies with commands to the hearbeats. Therefore, if a data node does not send a heartbeat during a predefined time interval, 10 min default, then that data node is considered down and the blocks stored on that data node will be replicated on other data nodes.
+\texttt{Step 1} is a \texttt{handshake} when the name space id and the software version of the data node are compared to the already existing nodes. If it is a newly initialized node, it can be added to the cluster by performing \texttt{Step 2 - Register}. Here the data node will receive a unique storage id which will not change later, being independent of the node's location.
+At \texttt{Step 3} the first \texttt{block report} is sent to the name node. And finally, at \texttt{Step 4} the data node begins sending \texttt{heartbeats}. The name node never communicates directly to any data node but replies with commands to the heartbeats. Therefore, if a data node does not send a heartbeat during a predefined time interval, 10 min default, then that data node is considered down and the blocks stored on that data node will be replicated on other data nodes.
 
 \subsubsection{Write}
-In order to write a file to the HDFS the client library first contacts the name node and in \texttt{Step 1.} it requests a block location in namespace for that file. 
-The name node replies with a list of data notes and the client in \texttt{Step 2.} sends the block to the first data node.
-In a pipeline manner, in \texttt{Step 3.} and \texttt{Step 4.} the first and second replicas are created by sending the block from one data node to another data node from the list of allocated data nodes. In Listing~\ref{lst:hdfs-write} one can find sample code using the java client library for writing and reading.
+In order to write a file to the HDFS the client library first contacts the name node and in \texttt{Step 1} it requests a block location in namespace for that file. 
+The name node replies with a list of data notes and the client in \texttt{Step 2} sends the block to the first data node.
+In a pipeline manner, in \texttt{Step 3} and \texttt{Step 4} the first and second replicas are created by sending the block from one data node to another data node from the list of allocated data nodes. In Listing~\ref{lst:hdfs-write} the reader can find sample code using the java client library for writing and reading.
 
 \begin{lstlisting}[basicstyle=\footnotesize\tt, frame=single, float=*, label={lst:hdfs-write},caption=HDFS Write and Read]
 Configuration configuration = new Configuration();
@@ -229,14 +229,14 @@ br.close();
 \end{lstlisting}
 
 \subsubsection{Read}
-When reading content, the client will first contact the name node to get the list of data nodes hosting the file blocks of the requested file. The name node replies with a list of blocks for each block there are assigned data nodes ordered by the proximity in the network of the data node to the client. 
+When reading content, the client will first contact the name node to get the list of data nodes hosting the file blocks of the requested file. The name node replies with a list of blocks and for each block there are assigned data nodes ordered by the proximity in the network between the data node and the client. 
 The client will then request the blocks in order from the data nodes. If one data node cannot reply to the request, then the client will contact the next data node hosting a replica of the requested block.
 
 \subsection{Features}
 In order to achieve fault tolerance and mitigate the high failure rate of the commodity machines, thus avoiding total loss of information in the case that one data node fails, blocks are stored according to the following \textbf{\texttt{block placement policy}}.
 \texttt{Rule 1.} No Data node contains more than one replica of any block. \texttt{Rule 2.} No rack contains more than two replicas of the same block (if sufficient racks on the cluster).
 
-On the name node it is run \texttt{replica management} tool in order to optimize disk usage, periodically ensure the replication factor for each block and verifying the location of each block according to the block placement policy. Each node is aware of its position in the network.
+On the name node runs a \texttt{replica management} tool in order to optimize disk usage, periodically ensuring the replication factor for each block and verifying the location of each block according to the block placement policy. Each node is aware of its position in the network.
 Additionally, another tool called \texttt{balancer} monitors disk space usage and optimizes the disk space by moving replicas from one node to another.
 
 On the data node, a tool called \texttt{block scanner} periodically checks the integrity of the stored blocks and issues the block report which is sent to the name node.
@@ -251,8 +251,8 @@ HDFS is ot optimized for handling
 big amount of small files or general purpose applications.
 It does not support concurrent modification and it is not optimized for arbitrary modification of the content, changing a particular byte section of a block.
 
-HDFS is cross platform being written in java and can also provide thrift or rest interfaces. The content can be accessed also through a web page by simply providing a url. One of the most important factors which contributed to the rise of Hadoop was that it is 
-opensource, free to use and experiment for anyone.
+HDFS is cross platform being written in java and can also provide thrift or rest interfaces. The content can be accessed also through a web page. One of the most important factors which contributed to the rise of Hadoop was that it is 
+opensource, free for anyone to use and experiment with.
 
 HDFS is widely used on a large scale in well known companies such as  Linkedin, Amazon, New York Times, Twitter, Ebay, Facebook, Spotify, IBM, Yahoo.
 
@@ -266,7 +266,7 @@ Since the concept of the GFS is the basis of HDFS the purpose of GFS is not much
 While HDFS is open source and widely used by different companies, GFS is not and is only used by Google itself.
 
 \subsection{Architecture}
-The GFS consists of three different types of components: the chunkservers, the master and the clients (see figure \ref{fig:gfs_architecture}). While chunkservers store the data which is available in the system, the master controlls the data. The clients can access available data through the master.
+The GFS consists of three different types of components: the chunkservers, the master and the clients (see figure \ref{fig:gfs_architecture}). While chunkservers store the data which is available in the system, the master controls the data. The clients can access available data through the master.
 
 \begin{figure}[!hbt]
 \centering
@@ -336,7 +336,7 @@ After all CSs have acknowledged receiving the data, the client sends a write req
 Then the primary forwards the write request to all secondaries leading them to apply the changes in the same order.
 
 \item
-On successfull writing the data the secondaries will indicate the completion of the write with a response to the primary.
+On successful writing the data the secondaries will indicate the completion of the write with a response to the primary.
 
 \item
 At last the primary returns the result of the write to the client. If there was any error, the client will retry the write from step 3 (pushing the data to CSs). If the error persists, the client will restart from step 1.
@@ -353,7 +353,7 @@ The workflow for record append is similar to the write operation explained in \r
 The client generally pushes the data to the last chunk of the file.
 
 \item[4.]
-Instead of requesting a write, the client sends a record appen request.
+Instead of requesting a write, the client sends a record append request.
 
 \item[5.]
 Before the primary applies the changes it checks if the data fits in the chunk (see below). If it fits the following steps are the same as for the write operation.
@@ -417,6 +417,7 @@ Having these things in mind one can see that GFS and HDFS allow performant strea
 There are only a few minor differences. GFS allows concurrent appending of files since appending is an atomic operation. This is not the case in HDFS.
 The HDFS's namenode is a single point of failure and provides no automatic recovery. In GFS there is the master, which is in some way also a single point of failure. But on a failure the master tries to recover. If this is not working there are also so called shadow masters which can take over operation.
 HDFS provides the feature of permission allowing to restrict access to files for different users. The GFS seems not to implement these at the current state.
+In GFS the chunk index is computed for each chunk while in HDFS the block index is assigned and always known in the namespace.
 
 It can be seen that there are not many differences. The main difference between both systems is the availability: GFS is a proprietary system in contrast to HDFS which is open source.
 
