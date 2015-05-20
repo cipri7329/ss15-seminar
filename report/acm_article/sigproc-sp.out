@@ -11,21 +11,17 @@
 \BOOKMARK [3][-]{subsubsection.2.2.2}{Write}{subsection.2.2}% 11
 \BOOKMARK [3][-]{subsubsection.2.2.3}{Read}{subsection.2.2}% 12
 \BOOKMARK [2][-]{subsection.2.3}{Features}{section.2}% 13
-\BOOKMARK [3][-]{subsubsection.2.3.1}{Block placement policy}{subsection.2.3}% 14
-\BOOKMARK [3][-]{subsubsection.2.3.2}{Replica management}{subsection.2.3}% 15
-\BOOKMARK [3][-]{subsubsection.2.3.3}{Balancer}{subsection.2.3}% 16
-\BOOKMARK [3][-]{subsubsection.2.3.4}{Block scanner}{subsection.2.3}% 17
-\BOOKMARK [2][-]{subsection.2.4}{Purpose}{section.2}% 18
-\BOOKMARK [1][-]{section.3}{Google File System \(GFS\)}{}% 19
-\BOOKMARK [2][-]{subsection.3.1}{Purpose}{section.3}% 20
-\BOOKMARK [2][-]{subsection.3.2}{Architecture}{section.3}% 21
-\BOOKMARK [2][-]{subsection.3.3}{Workflows}{section.3}% 22
-\BOOKMARK [3][-]{subsubsection.3.3.1}{Read}{subsection.3.3}% 23
-\BOOKMARK [3][-]{subsubsection.3.3.2}{Write}{subsection.3.3}% 24
-\BOOKMARK [3][-]{subsubsection.3.3.3}{Record Append}{subsection.3.3}% 25
-\BOOKMARK [2][-]{subsection.3.4}{Features}{section.3}% 26
-\BOOKMARK [3][-]{subsubsection.3.4.1}{Chunk Replication}{subsection.3.4}% 27
-\BOOKMARK [3][-]{subsubsection.3.4.2}{Garbage Collection}{subsection.3.4}% 28
-\BOOKMARK [1][-]{section.4}{Comparison}{}% 29
-\BOOKMARK [1][-]{section.5}{Conclusions and Future Work}{}% 30
-\BOOKMARK [1][-]{section.6}{References}{}% 31
+\BOOKMARK [2][-]{subsection.2.4}{Purpose}{section.2}% 14
+\BOOKMARK [1][-]{section.3}{Google File System \(GFS\)}{}% 15
+\BOOKMARK [2][-]{subsection.3.1}{Purpose}{section.3}% 16
+\BOOKMARK [2][-]{subsection.3.2}{Architecture}{section.3}% 17
+\BOOKMARK [2][-]{subsection.3.3}{Workflows}{section.3}% 18
+\BOOKMARK [3][-]{subsubsection.3.3.1}{Read}{subsection.3.3}% 19
+\BOOKMARK [3][-]{subsubsection.3.3.2}{Write}{subsection.3.3}% 20
+\BOOKMARK [3][-]{subsubsection.3.3.3}{Record Append}{subsection.3.3}% 21
+\BOOKMARK [2][-]{subsection.3.4}{Features}{section.3}% 22
+\BOOKMARK [3][-]{subsubsection.3.4.1}{Chunk Replication}{subsection.3.4}% 23
+\BOOKMARK [3][-]{subsubsection.3.4.2}{Garbage Collection}{subsection.3.4}% 24
+\BOOKMARK [1][-]{section.4}{Comparison}{}% 25
+\BOOKMARK [1][-]{section.5}{Conclusions and Future Work}{}% 26
+\BOOKMARK [1][-]{section.6}{References}{}% 27

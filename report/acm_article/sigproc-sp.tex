@@ -33,9 +33,12 @@
 \usepackage{epstopdf}
 \pagenumbering{arabic}
 \usepackage{hyperref}
+\usepackage{listings}
 \newtheorem{theorem}{Assumption}
 
 \begin{document}
+
+\lstset{language=java}    
 
 \title{Distributed File Systems: \\Hadoop Distributed File System and Google File System}
 %
@@ -98,9 +101,10 @@ Daniel Straub\\
 % is the number that will appear on the first page PLUS the
 % number that will appear in the \additionalauthors section.
 
+
 \maketitle
 \begin{abstract}
-Distributed file systems have been a technology enabler to store and process large files which exceed the size of any drive while working in a distributed and fail tolerant manner. The first and most known implementations are Google File System and Hadoop Distributed File System.
+Distributed file systems have been a technology enabler to store and process large files which exceed the size of any drive while working in a distributed and fail tolerant manner. Among the first and most known implementations are Google File System and Hadoop Distributed File System.
 \end{abstract}
 
 % A category with the (minimum) three required fields
@@ -113,12 +117,12 @@ Distributed file systems have been a technology enabler to store and process lar
 % INTRODUCTION
 \section{Introduction}
 During the late 90s the Y2K issue was a popular topic in media, but together with the 2000s a bigger and more silent issue took its place. 
-The rise of internet traffic, saving and processing every online footprint (e.g. user clicks), having countless sensors pouring out data into databases and then the dawn of the smartphone era meant that thousands of terabytes and petabytes of data were being generated daily. 
+The rise of internet traffic combined with saving and processing every online footprint (e.g. user clicks), having countless sensors pouring out data into databases and then the dawn of the smartphone era meant that thousands of terabytes and petabytes of data were generated daily. 
 This became a problem due to multiple reasons. Firstly, there was no large enough storage medium to store all the data in a single physical location, and secondly processing such amount of data in order to extract valuable information became an even bigger challenge. Even if there were enough space to store huge amounts of data on a single drive, only seeking through such amount of data would be prohibitive in terms of access times. In this context a new IT domain was born - Big Data. 
 
 The requirements of an innovative file system which could cope with such large amounts of data can be traced along the following lines.
 Firstly, large amounts of data should be stored reliably. 
-Secondly, high bandwidth streaming is a priority (e.g. play a youtube video before it is all loaded locally).
+Secondly, high bandwidth streaming is a priority (e.g. play a youtube video before the entire clip is loaded locally).
 Another key aspect is distributing storage across multiple locations
 and distributed computation.
 Finally, data besides being stored must be analyzed and transformed in a cost-effective manner.
@@ -126,9 +130,8 @@ Finally, data besides being stored must be analyzed and transformed in a cost-ef
 The proposed solution came from Google where Google File System~\cite{google1} was introduced alongside the MapReduce algorithm.
 The central pillars of the proposed solution are the following.
 First of all, moving computation where data resides means sending the algorithm in a distributed manner where the data is stored, compute partial results and then combine them. The old paradigm was to bring all the data to a central location, e.g. a supercomputer, and there do all the processing. Moving a few lines of code of an algorithm across network and retrieving partial results is much faster than moving the entire data across networks.
-Secondly, low costs is achieved by using commodity machines. This means that instead of using very expensive and customized hardware, the new system could run on any computer available at any IT store. Thus the new system must have a high fault tolerance because in a cluster of thousands of servers, the failure rate of an average computer can become quite high compared to the old paradigm.
+Secondly, low cost is achieved by using commodity machines. This means that instead of using very expensive and customized hardware, the new system could run on any computer available at any IT store. Thus the new system must have a high fault tolerance because in a cluster of thousands of servers, the failure rate of an average computer can become quite high compared to the old paradigm.
 Finally, vertical and horizontal scalability provide maintainability and extensibility to the system. Vertical scalability means that a node in the server cluster can be upgraded at any time in terms of hardware components, e.g. RAM, CPU, storage. Horizontal scalability means that a new node can always be automatically added to the system without the need of restarting or changing the running server cluster.
-
 
 %===========================================
 % Hadoop
@@ -189,14 +192,12 @@ The secondary node is called a \texttt{checkpoint node} if it only stores the sy
 
 If on the secondary node there is also an up to date namespace kept in memory then this node is called a \texttt{backup node}. This is also called a read-only name node. 
 
-
 \begin{figure}[!hbt]
 \centering
 \epsfig{file=hdfs_pics/hdfs1.png, width=\linewidth}
 \caption{HDFS Architecture}
 \label{fig:hdfs_architecture}
 \end{figure}
-
 
 \subsection{Workflow}
 HDFS follows the single writer, multiple reader model.
@@ -206,58 +207,54 @@ When a data node is added to the server cluster it performs the following series
 \texttt{Step 1.} is a \texttt{handshake} when the name space id and the software version of the data node are compared to the already existing nodes. If it is a newly initialed node, it can be added to the cluster by performing \texttt{Step 2. Register}. Here the data node will receive a unique storage id which will not change later, being independent of the node's location.
 At \texttt{Step 3.} the first \texttt{block report} is sent to the name node. And finally, at \texttt{Step 4.} the data node begins sending \texttt{heartbeats}. The name node never communicates directly to any data node but replies with commands to the hearbeats. Therefore, if a data node does not send a heartbeat during a predefined time interval, 10 min default, then that data node is considered down and the blocks stored on that data node will be replicated on other data nodes.
 
-
 \subsubsection{Write}
-1. Request block in namespace for file
-2. Send block to a Data node
-3. Create first replica
-4. Create second replica
+In order to write a file to the HDFS the client library first contacts the name node and in \texttt{Step 1.} it requests a block location in namespace for that file. 
+The name node replies with a list of data notes and the client in \texttt{Step 2.} sends the block to the first data node.
+In a pipeline manner, in \texttt{Step 3.} and \texttt{Step 4.} the first and second replicas are created by sending the block from one data node to another data node from the list of allocated data nodes. In Listing~\ref{lst:hdfs-write} one can find sample code using the java client library for writing and reading.
+
+\begin{lstlisting}[basicstyle=\footnotesize\tt, frame=single, float=*, label={lst:hdfs-write},caption=HDFS Write and Read]
+Configuration configuration = new Configuration();
+FileSystem hdfs = FileSystem.get( new URI( "hdfs://localhost:54310" ), configuration );
+Path newFilePath = new Path("hdfs://localhost:54310/s2013/batch/table.html");
+//write
+OutputStream os = hdfs.createNewFile(newFilePath);
+BufferedWriter bw =new BufferedWriter(os);
+bw.write("Hello Hadoop!");
+bw.close();
+//read
+InputStreamReader isr = new InputStreamReader(hdfs .open(newFilePath ))
+BufferedReader br=new BufferedReader(isr); 
+String line=br.readLine();
+br.close();
+\end{lstlisting}
 
 \subsubsection{Read}
-5. Get list of datanodes hosting file blocks
-6. Get blocks in order
+When reading content, the client will first contact the name node to get the list of data nodes hosting the file blocks of the requested file. The name node replies with a list of blocks for each block there are assigned data nodes ordered by the proximity in the network of the data node to the client. 
+The client will then request the blocks in order from the data nodes. If one data node cannot reply to the request, then the client will contact the next data node hosting a replica of the requested block.
 
 \subsection{Features}
-.. add text
+In order to achieve fault tolerance and mitigate the high failure rate of the commodity machines, thus avoiding total loss of information in the case that one data node fails, blocks are stored according to the following \textbf{\texttt{block placement policy}}.
+\texttt{Rule 1.} No Data node contains more than one replica of any block. \texttt{Rule 2.} No rack contains more than two replicas of the same block (if sufficient racks on the cluster).
 
+On the name node it is run \texttt{replica management} tool in order to optimize disk usage, periodically ensure the replication factor for each block and verifying the location of each block according to the block placement policy. Each node is aware of its position in the network.
+Additionally, another tool called \texttt{balancer} monitors disk space usage and optimizes the disk space by moving replicas from one node to another.
 
-\subsubsection{Block placement policy}
-1. No Data node contains more than one replica of any block
-2. No rack contains more than two replicas of the same block (if sufficient racks on the cluster)
-
-\subsubsection{Replica management}
-@Name node
-- optimize disk usage
-- replication factor
-- rack awareness
-
-\subsubsection{Balancer}
-@Name node
-- disk space usage
-- move replicas
-
-\subsubsection{Block scanner}
-@Datanode
+On the data node, a tool called \texttt{block scanner} periodically checks the integrity of the stored blocks and issues the block report which is sent to the name node.
 
 \subsection{Purpose}
-.. add text
-Optimized for
-- large files
-- commodity hardware
-- streaming
-- batch processing
-- multiple reads
-Not optimized for
-- big amount of small files
-- concurrent modification
-- arbitrary modification
-- general purpose applications
-Cross platform
-- java, thrift, rest
-- web access, console
-- opensource
-Companies using hdfs
-- linkedin, amazon, new york times, twitter, ebay, facebook, spotify, ibm, yahoo
+Hadoop Distributed File System is optimized for
+handling large files, running on commodity hardware, thus keeping the costs low.
+Additionaly it is optimized for data streaming, batch processing
+and multiple reads.
+
+HDFS is ot optimized for handling
+big amount of small files or general purpose applications.
+It does not support concurrent modification and it is not optimized for arbitrary modification of the content, changing a particular byte section of a block.
+
+HDFS is cross platform being written in java and can also provide thrift or rest interfaces. The content can be accessed also through a web page by simply providing a url. One of the most important factors which contributed to the rise of Hadoop was that it is 
+opensource, free to use and experiment for anyone.
+
+HDFS is widely used on a large scale in well known companies such as  Linkedin, Amazon, New York Times, Twitter, Ebay, Facebook, Spotify, IBM, Yahoo.
 
 
 %===========================================
@@ -426,12 +423,9 @@ It can be seen that there are not many differences. The main difference between 
 %===========================================
 % CONCLUSIONS
 \section{Conclusions and Future Work}
-... not finished ...
+In the age of Big Data, HDFS and GFS have successfully managed to store, process and deliver enormous amounts of data while keeping the costs low by running on commodity machines using distributed storage and distributed computation as key ingredients. 
 
-This paragraph will end the body of this sample document.
-Remember that you might still have Acknowledgments or
-Appendices; brief samples of these
-follow.
+As future work in the context of big data, improved security and user permissions are always a priority for highly sensitive data. Additionally, real-time data processing and displaying updated statistics without going over the entire data set again can significantly improve performance.
 
 
 %\end{document}  % This is where a 'short' article might terminate
